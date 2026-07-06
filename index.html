@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Who is Your Waifu? — Summoning Circle</title>
+
+<!-- Google Fonts: Baloo 2 (display / gacha-game energy), Manrope (body), JetBrains Mono (stat labels) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  /* ============================================================
+     DESIGN TOKENS
+     Palette: deep indigo-night background, magenta + cyan gacha
+     glow, gold for "rare pull" accents.
+     ============================================================ */
+  :root{
+    --bg-deep:      #0a0817;
+    --bg-panel:     #130f27;
+    --bg-panel-2:   #1a1436;
+    --line:         rgba(255,255,255,0.09);
+
+    --pink:         #ff4fa3;
+    --pink-soft:    rgba(255, 79, 163, 0.35);
+    --cyan:         #47e8d4;
+    --cyan-soft:    rgba(71, 232, 212, 0.30);
+    --gold:         #ffcf5c;
+
+    --text:         #f3efff;
+    --muted:        #a79dc7;
+    --muted-dim:    #6f6693;
+
+    --font-display: 'Baloo 2', system-ui, sans-serif;
+    --font-body:    'Manrope', system-ui, sans-serif;
+    --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+
+    --radius-lg: 28px;
+    --radius-md: 16px;
+    --radius-sm: 10px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0;
+    padding:0;
+    min-height:100%;
+    background: var(--bg-deep);
+    color: var(--text);
+    font-family: var(--font-body);
+  }
+
+  body{
+    position:relative;
+    overflow-x:hidden;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 48px 20px 64px;
+  }
+
+  /* Ambient night-sky glow, sits behind everything */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:-2;
+    background:
+      radial-gradient(600px 500px at 15% 10%, rgba(255,79,163,0.16), transparent 60%),
+      radial-gradient(700px 600px at 85% 90%, rgba(71,232,212,0.13), transparent 60%),
+      var(--bg-deep);
+  }
+
+  /* Faint starfield texture */
+  body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    opacity:0.5;
+    background-image:
+      radial-gradient(1.5px 1.5px at 20% 30%, rgba(255,255,255,0.5) 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 70% 65%, rgba(255,255,255,0.4) 50%, transparent 51%),
+      radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.35) 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 90% 20%, rgba(255,255,255,0.4) 50%, transparent 51%),
+      radial-gradient(1px 1px at 55% 45%, rgba(255,255,255,0.3) 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 10% 70%, rgba(255,255,255,0.4) 50%, transparent 51%);
+    background-repeat: repeat;
+    background-size: 340px 340px;
+  }
+
+  /* ============================================================
+     HEADER
+     ============================================================ */
+  .eyebrow{
+    font-family: var(--font-mono);
+    letter-spacing: 0.25em;
+    font-size: 11px;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    opacity: 0.85;
+  }
+
+  h1{
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(32px, 6vw, 54px);
+    line-height: 1.05;
+    margin: 0 0 10px;
+    text-align:center;
+    background: linear-gradient(100deg, var(--pink) 0%, #ffb0d9 30%, var(--cyan) 70%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .subtitle{
+    text-align:center;
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 480px;
+    margin: 0 0 36px;
+    line-height:1.6;
+  }
+
+  /* ============================================================
+     CONTROL PANEL — the "summon console"
+     ============================================================ */
+  .panel{
+    width:100%;
+    max-width: 460px;
+    background: linear-gradient(180deg, var(--bg-panel), var(--bg-panel-2));
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.6);
+    margin-bottom: 40px;
+  }
+
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+
+  .field label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted-dim);
+  }
+
+  select#artistSelect{
+    appearance:none;
+    -webkit-appearance:none;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-weight:600;
+    font-size:15px;
+    padding: 12px 40px 12px 14px;
+    border-radius: var(--radius-sm);
+    cursor:pointer;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9' fill='none'><path d='M1 1L7 7L13 1' stroke='%2347e8d4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  select#artistSelect:focus-visible,
+  #generateBtn:focus-visible{
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+  }
+
+  select#artistSelect:hover{
+    border-color: var(--cyan-soft);
+  }
+
+  #generateBtn{
+    position:relative;
+    border:none;
+    cursor:pointer;
+    padding: 15px 20px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 0.01em;
+    color: #170b1e;
+    background: linear-gradient(95deg, var(--gold), var(--pink) 55%, var(--cyan) 110%);
+    background-size: 180% 100%;
+    background-position: 0% 0%;
+    transition: background-position 0.5s ease, transform 0.15s ease, box-shadow 0.3s ease;
+    box-shadow: 0 10px 30px -8px var(--pink-soft);
+  }
+
+  #generateBtn:hover{
+    background-position: 100% 0%;
+    box-shadow: 0 14px 36px -8px var(--pink-soft);
+  }
+
+  #generateBtn:active{
+    transform: scale(0.97);
+  }
+
+  #generateBtn:disabled{
+    cursor:not-allowed;
+    opacity:0.7;
+    transform:none;
+  }
+
+  /* ============================================================
+     SUMMONING STAGE — signature element: a rotating magic circle
+     that spins behind the result card, speeding up while loading
+     and settling with a flash when the waifu is revealed.
+     ============================================================ */
+  .stage{
+    position:relative;
+    width: min(360px, 84vw);
+    aspect-ratio: 3 / 4;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom: 28px;
+  }
+
+  .ring{
+    position:absolute;
+    border-radius:50%;
+    border: 2px dashed var(--cyan-soft);
+    animation: spin 18s linear infinite;
+  }
+  .ring.r1{ width:112%; height: 92%; border-color: rgba(255,79,163,0.28); animation-duration: 22s; }
+  .ring.r2{ width:98%;  height: 80%; border-style: solid; border-width:1px; animation-duration: 14s; animation-direction: reverse; }
+  .ring.r3{ width:84%;  height: 68%; animation-duration: 9s; }
+
+  .stage.charging .ring{ animation-duration: 1.1s; }
+  .stage.charging .ring.r2{ animation-duration: 0.8s; }
+
+  @keyframes spin{
+    from{ transform: rotate(0deg); }
+    to{ transform: rotate(360deg); }
+  }
+
+  .card{
+    position:relative;
+    width: 82%;
+    height: 90%;
+    border-radius: var(--radius-lg);
+    overflow:hidden;
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 30px 60px -25px rgba(0,0,0,0.7);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .card-placeholder{
+    text-align:center;
+    padding: 20px;
+    color: var(--muted-dim);
+    font-size: 13px;
+    line-height:1.6;
+  }
+
+  .card-placeholder .glyph{
+    font-size: 34px;
+    display:block;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 12px var(--pink-soft));
+  }
+
+  .card img{
+    width:100%;
+    height:100%;
+    object-fit: cover;
+    opacity:0;
+    transform: scale(1.05);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+
+  .card img.shown{
+    opacity:1;
+    transform: scale(1);
+  }
+
+  /* Flash-of-light reveal effect */
+  .flash{
+    position:absolute;
+    inset:0;
+    background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,255,255,0) 65%);
+    opacity:0;
+    pointer-events:none;
+  }
+  .flash.play{
+    animation: flash-pop 0.6s ease-out forwards;
+  }
+  @keyframes flash-pop{
+    0%{ opacity:0.9; }
+    100%{ opacity:0; }
+  }
+
+  .meta-overlay{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    padding: 16px 16px 14px;
+    background: linear-gradient(0deg, rgba(6,4,16,0.92) 10%, rgba(6,4,16,0.55) 60%, transparent 100%);
+    transform: translateY(100%);
+    transition: transform 0.4s ease;
+  }
+  .meta-overlay.show{ transform: translateY(0); }
+
+  .rating-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #06231c;
+    background: var(--cyan);
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+  }
+
+  .char-name{
+    font-family: var(--font-display);
+    font-weight:700;
+    font-size: 19px;
+    margin: 0 0 3px;
+    color: var(--text);
+  }
+
+  .artist-name{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gold);
+    margin:0;
+  }
+
+  .source-link{
+    display:inline-block;
+    margin-top:8px;
+    font-size: 11px;
+    color: var(--muted);
+    text-decoration:none;
+    border-bottom: 1px dotted var(--muted-dim);
+  }
+  .source-link:hover{ color: var(--cyan); border-color: var(--cyan); }
+
+  /* ============================================================
+     STATUS LINE (loading / error / info) below the stage
+     ============================================================ */
+  .status{
+    min-height: 20px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--muted);
+    text-align:center;
+    max-width: 380px;
+    margin-bottom: 20px;
+  }
+  .status.is-error{ color: #ff8fa8; }
+
+  footer{
+    margin-top: auto;
+    padding-top: 20px;
+    font-size: 11px;
+    color: var(--muted-dim);
+    text-align:center;
+  }
+  footer a{ color: var(--muted); }
+  footer a:hover{ color: var(--cyan); }
+
+  /* Respect reduced-motion preference */
+  @media (prefers-reduced-motion: reduce){
+    .ring{ animation: none; }
+    .card img, .meta-overlay, #generateBtn{ transition: none; }
+    .flash.play{ animation: none; }
+  }
+
+  @media (max-width: 420px){
+    .panel{ padding:16px; }
+    h1{ font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+
+  <p class="eyebrow">✦ Gacha Summoning Circle ✦</p>
+  <h1>Who is Your Waifu?</h1>
+  <p class="subtitle">Putar lingkaran pemanggilan dan temukan waifu-mu berikutnya, langsung dari koleksi Nekos API. Semua hasil dijamin aman (SFW).</p>
+
+  <div class="panel">
+    <div class="field">
+      <label for="artistSelect">Pilih Artis</label>
+      <select id="artistSelect">
+        <option value="random" selected>Random (semua artis)</option>
+        <option value="tsunako">Tsunako (Date A Live)</option>
+      </select>
+    </div>
+    <button id="generateBtn" type="button">🎴 Generate Waifu</button>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="ring r1"></div>
+    <div class="ring r2"></div>
+    <div class="ring r3"></div>
+    <div class="card" id="card">
+      <div class="card-placeholder" id="placeholder">
+        <span class="glyph">🌙</span>
+        Lingkaran masih diam.<br>Tekan tombol untuk memanggil waifu pertamamu.
+      </div>
+      <img id="waifuImg" alt="">
+      <div class="flash" id="flash"></div>
+      <div class="meta-overlay" id="metaOverlay">
+        <span class="rating-badge" id="ratingBadge">✓ SAFE</span>
+        <p class="char-name" id="charName"></p>
+        <p class="artist-name" id="artistName"></p>
+        <a class="source-link" id="sourceLink" href="#" target="_blank" rel="noopener noreferrer">Lihat sumber asli →</a>
+      </div>
+    </div>
+  </div>
+
+  <p class="status" id="status"></p>
+
+  <footer>
+    Digerakkan oleh <a href="https://nekosapi.com" target="_blank" rel="noopener noreferrer">Nekos API</a> · Semua gambar milik senimannya masing-masing.
+  </footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     CONSTANTS & DOM REFS
+     ============================================================ */
+  const API_BASE = "https://api.nekosapi.com/v4";
+  const TSUNAKO_QUERY = "tsunako"; // matched case-insensitively against artist_name
+  const MAX_SEARCH_PAGES = 12;     // safety cap so a missing artist can't loop forever
+  const PAGE_SIZE = 100;           // max allowed by the API per docs
+
+  const artistSelect = document.getElementById("artistSelect");
+  const generateBtn  = document.getElementById("generateBtn");
+  const stage        = document.getElementById("stage");
+  const card         = document.getElementById("card");
+  const placeholder  = document.getElementById("placeholder");
+  const waifuImg     = document.getElementById("waifuImg");
+  const flash        = document.getElementById("flash");
+  const metaOverlay  = document.getElementById("metaOverlay");
+  const charNameEl   = document.getElementById("charName");
+  const artistNameEl = document.getElementById("artistName");
+  const sourceLinkEl = document.getElementById("sourceLink");
+  const statusEl     = document.getElementById("status");
+
+  // In-memory cache of images already confirmed to be by Tsunako,
+  // so we don't have to re-scan the whole catalogue on every click.
+  let tsunakoCache = [];
+  let lastShownId = null;
+
+  /* ============================================================
+     HELPERS
+     ============================================================ */
+
+  function setStatus(message, isError){
+    statusEl.textContent = message || "";
+    statusEl.classList.toggle("is-error", Boolean(isError));
+  }
+
+  function setLoading(isLoading){
+    generateBtn.disabled = isLoading;
+    stage.classList.toggle("charging", isLoading);
+  }
+
+  // Adds a cache-busting param so browsers/CDNs never serve a stale
+  // cached response for what should be a fresh random pull.
+  function withCacheBust(url){
+    const glue = url.includes("?") ? "&" : "?";
+    return url + glue + "_=" + Date.now() + Math.random().toString(16).slice(2);
+  }
+
+  async function fetchJson(url){
+    const res = await fetch(withCacheBust(url), { headers: { "Accept": "application/json" } });
+    if (!res.ok){
+      throw new Error("Permintaan API gagal (status " + res.status + ")");
+    }
+    return res.json();
+  }
+
+  // The API's raw responses are sometimes a plain array and sometimes
+  // wrapped (e.g. { data: [...] } or { items: [...] }). Normalize both.
+  function toArray(payload){
+    if (Array.isArray(payload)) return payload;
+    if (payload && Array.isArray(payload.data)) return payload.data;
+    if (payload && Array.isArray(payload.items)) return payload.items;
+    if (payload && Array.isArray(payload.results)) return payload.results;
+    return [];
+  }
+
+  function pickRandom(arr){
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  // Tries to read a character name from whatever shape the API gives us.
+  // The public schema mostly exposes tags/artist_name, but this stays
+  // defensive in case a "characters" field is present on some images.
+  function extractCharacterName(image){
+    if (Array.isArray(image.characters) && image.characters.length){
+      return image.characters.map(c => (typeof c === "string" ? c : c.name)).filter(Boolean).join(", ");
+    }
+    if (typeof image.character_name === "string" && image.character_name.trim()){
+      return image.character_name.trim();
+    }
+    return null;
+  }
+
+  /* ============================================================
+     DATA FETCHING
+     ============================================================ */
+
+  // Grabs one random, SAFE-rated image from the whole catalogue.
+  async function fetchRandomWaifu(){
+    const url = `${API_BASE}/images/random?rating=safe&limit=8`;
+    const payload = await fetchJson(url);
+    const images = toArray(payload).filter(img => img && img.url && img.rating === "safe");
+    if (!images.length){
+      throw new Error("Tidak ada gambar SAFE yang ditemukan, coba lagi.");
+    }
+    return pickRandom(images);
+  }
+
+  // Scans paginated SAFE results looking for artist_name containing
+  // "tsunako", caching every match it finds along the way.
+  async function findTsunakoWaifu(){
+    if (tsunakoCache.length > 1){
+      return pickRandom(tsunakoCache);
+    }
+
+    setStatus("Menjelajahi galeri Tsunako…");
+
+    for (let page = 0; page < MAX_SEARCH_PAGES; page++){
+      const offset = page * PAGE_SIZE;
+      const url = `${API_BASE}/images?rating=safe&limit=${PAGE_SIZE}&offset=${offset}`;
+      let payload;
+      try{
+        payload = await fetchJson(url);
+      } catch (err){
+        break; // stop scanning silently, we'll fall back below
+      }
+
+      const images = toArray(payload);
+      if (!images.length) break; // reached the end of the catalogue
+
+      for (const img of images){
+        if (img && typeof img.artist_name === "string" &&
+            img.artist_name.toLowerCase().includes(TSUNAKO_QUERY) &&
+            img.rating === "safe"){
+          tsunakoCache.push(img);
+        }
+      }
+
+      // Stop early once we have a decent pool to randomize from.
+      if (tsunakoCache.length >= 12) break;
+      // Short pages mean we've hit the end of available results.
+      if (images.length < PAGE_SIZE) break;
+    }
+
+    if (!tsunakoCache.length){
+      throw new Error(
+        "Tidak ditemukan gambar dari Tsunako di koleksi Nekos API saat ini."
+      );
+    }
+
+    return pickRandom(tsunakoCache);
+  }
+
+  /* ============================================================
+     RENDERING
+     ============================================================ */
+
+  function renderWaifu(image){
+    placeholder.style.display = "none";
+
+    waifuImg.classList.remove("shown");
+    waifuImg.src = image.url;
+    waifuImg.alt = "Ilustrasi waifu" + (image.artist_name ? " oleh " + image.artist_name : "");
+
+    waifuImg.onload = () => {
+      waifuImg.classList.add("shown");
+      flash.classList.remove("play");
+      // Force reflow so the flash animation can replay every time.
+      void flash.offsetWidth;
+      flash.classList.add("play");
+    };
+
+    const characterName = extractCharacterName(image);
+    if (characterName){
+      charNameEl.textContent = characterName;
+      charNameEl.style.display = "";
+    } else {
+      charNameEl.style.display = "none";
+    }
+
+    if (image.artist_name){
+      artistNameEl.textContent = "Artis: " + image.artist_name;
+      artistNameEl.style.display = "";
+    } else {
+      artistNameEl.textContent = "Artis tidak diketahui";
+      artistNameEl.style.display = "";
+    }
+
+    if (image.source_url){
+      sourceLinkEl.href = image.source_url;
+      sourceLinkEl.style.display = "";
+    } else {
+      sourceLinkEl.style.display = "none";
+    }
+
+    metaOverlay.classList.add("show");
+    lastShownId = image.id;
+  }
+
+  /* ============================================================
+     MAIN ACTION
+     ============================================================ */
+
+  async function handleGenerate(){
+    setLoading(true);
+    setStatus("Memanggil dari alam waifu…");
+    metaOverlay.classList.remove("show");
+
+    try{
+      const mode = artistSelect.value;
+      let image;
+
+      if (mode === "tsunako"){
+        image = await findTsunakoWaifu();
+      } else {
+        image = await fetchRandomWaifu();
+      }
+
+      // Avoid showing the exact same image twice in a row when possible.
+      if (image.id === lastShownId && mode === "tsunako" && tsunakoCache.length > 1){
+        const alt = tsunakoCache.find(img => img.id !== lastShownId);
+        if (alt) image = alt;
+      }
+
+      renderWaifu(image);
+      setStatus(mode === "tsunako"
+        ? "Waifu dari Tsunako berhasil dipanggil! ✨"
+        : "Waifu berhasil dipanggil! ✨");
+    } catch (err){
+      console.error(err);
+      setStatus(err.message || "Gagal memanggil waifu, coba lagi.", true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  generateBtn.addEventListener("click", handleGenerate);
+
+  // Reset the Tsunako cache if the user switches artist mode, so a
+  // fresh scan can happen (cheap safeguard against stale state).
+  artistSelect.addEventListener("change", () => {
+    if (artistSelect.value !== "tsunako"){
+      // Keep cache around, it's harmless and saves a re-scan if they
+      // switch back — only random mode never needs it.
+    }
+  });
+})();
+</script>
+</body>
+</html>
