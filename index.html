@@ -400,14 +400,44 @@
 
   <p class="eyebrow">✦ Gacha Summoning Circle ✦</p>
   <h1>Who is Your Waifu?</h1>
-  <p class="subtitle">Putar lingkaran pemanggilan dan temukan waifu-mu berikutnya, langsung dari koleksi Nekos API. Semua hasil dijamin aman (SFW).</p>
+  <p class="subtitle">Putar lingkaran pemanggilan dan temukan waifu-mu berikutnya, langsung dari koleksi Waifu.pics. Semua hasil dijamin aman (SFW).</p>
 
   <div class="panel">
     <div class="field">
-      <label for="artistSelect">Pilih Artis</label>
+      <label for="artistSelect">Pilih Mode</label>
       <select id="artistSelect">
-        <option value="random" selected>Random (semua artis)</option>
-        <option value="tsunako">Tsunako (Date A Live)</option>
+        <option value="random" selected>Random (semua kategori)</option>
+        <option value="waifu">Waifu</option>
+        <option value="neko">Neko (Cat Girl)</option>
+        <option value="shinobu">Shinobu</option>
+        <option value="megumin">Megumin</option>
+        <option value="bully">Bully</option>
+        <option value="cuddle">Cuddle</option>
+        <option value="cry">Cry</option>
+        <option value="hug">Hug</option>
+        <option value="awoo">Awoo</option>
+        <option value="kiss">Kiss</option>
+        <option value="lick">Lick</option>
+        <option value="pat">Pat</option>
+        <option value="smug">Smug</option>
+        <option value="bonk">Bonk</option>
+        <option value="yeet">Yeet</option>
+        <option value="blush">Blush</option>
+        <option value="smile">Smile</option>
+        <option value="wave">Wave</option>
+        <option value="highfive">Highfive</option>
+        <option value="handhold">Handhold</option>
+        <option value="nom">Nom</option>
+        <option value="bite">Bite</option>
+        <option value="glomp">Glomp</option>
+        <option value="slap">Slap</option>
+        <option value="kill">Kill</option>
+        <option value="kick">Kick</option>
+        <option value="happy">Happy</option>
+        <option value="wink">Wink</option>
+        <option value="poke">Poke</option>
+        <option value="dance">Dance</option>
+        <option value="cringe">Cringe</option>
       </select>
     </div>
     <button id="generateBtn" type="button">🎴 Generate Waifu</button>
@@ -436,7 +466,7 @@
   <p class="status" id="status"></p>
 
   <footer>
-    Digerakkan oleh <a href="https://nekosapi.com" target="_blank" rel="noopener noreferrer">Nekos API</a> · Semua gambar milik senimannya masing-masing.
+    Digerakkan oleh <a href="https://waifu.pics" target="_blank" rel="noopener noreferrer">Waifu.pics</a> · Semua gambar milik senimannya masing-masing.
   </footer>
 
 <script>
@@ -446,10 +476,44 @@
   /* ============================================================
      CONSTANTS & DOM REFS
      ============================================================ */
-  const API_BASE = "https://api.nekosapi.com/v4";
-  const TSUNAKO_QUERY = "tsunako"; // matched case-insensitively against artist_name
-  const MAX_SEARCH_PAGES = 12;     // safety cap so a missing artist can't loop forever
-  const PAGE_SIZE = 100;           // max allowed by the API per docs
+  const API_BASE = "https://api.waifu.pics/sfw";
+  const CATEGORY_MAP = {
+    'random': 'waifu', // random akan mengambil dari berbagai kategori
+    'waifu': 'waifu',
+    'neko': 'neko',
+    'shinobu': 'shinobu',
+    'megumin': 'megumin',
+    'bully': 'bully',
+    'cuddle': 'cuddle',
+    'cry': 'cry',
+    'hug': 'hug',
+    'awoo': 'awoo',
+    'kiss': 'kiss',
+    'lick': 'lick',
+    'pat': 'pat',
+    'smug': 'smug',
+    'bonk': 'bonk',
+    'yeet': 'yeet',
+    'blush': 'blush',
+    'smile': 'smile',
+    'wave': 'wave',
+    'highfive': 'highfive',
+    'handhold': 'handhold',
+    'nom': 'nom',
+    'bite': 'bite',
+    'glomp': 'glomp',
+    'slap': 'slap',
+    'kill': 'kill',
+    'kick': 'kick',
+    'happy': 'happy',
+    'wink': 'wink',
+    'poke': 'poke',
+    'dance': 'dance',
+    'cringe': 'cringe'
+  };
+
+  // Kategori untuk random (ambil dari semua kategori yang tersedia)
+  const RANDOM_CATEGORIES = Object.keys(CATEGORY_MAP).filter(c => c !== 'random');
 
   const artistSelect = document.getElementById("artistSelect");
   const generateBtn  = document.getElementById("generateBtn");
@@ -464,10 +528,7 @@
   const sourceLinkEl = document.getElementById("sourceLink");
   const statusEl     = document.getElementById("status");
 
-  // In-memory cache of images already confirmed to be by Tsunako,
-  // so we don't have to re-scan the whole catalogue on every click.
-  let tsunakoCache = [];
-  let lastShownId = null;
+  let lastShownUrl = null;
 
   /* ============================================================
      HELPERS
@@ -483,106 +544,57 @@
     stage.classList.toggle("charging", isLoading);
   }
 
-  // Adds a cache-busting param so browsers/CDNs never serve a stale
-  // cached response for what should be a fresh random pull.
-  function withCacheBust(url){
-    const glue = url.includes("?") ? "&" : "?";
-    return url + glue + "_=" + Date.now() + Math.random().toString(16).slice(2);
-  }
-
-  async function fetchJson(url){
-    const res = await fetch(withCacheBust(url), { headers: { "Accept": "application/json" } });
-    if (!res.ok){
-      throw new Error("Permintaan API gagal (status " + res.status + ")");
-    }
-    return res.json();
-  }
-
-  // The API's raw responses are sometimes a plain array and sometimes
-  // wrapped (e.g. { data: [...] } or { items: [...] }). Normalize both.
-  function toArray(payload){
-    if (Array.isArray(payload)) return payload;
-    if (payload && Array.isArray(payload.data)) return payload.data;
-    if (payload && Array.isArray(payload.items)) return payload.items;
-    if (payload && Array.isArray(payload.results)) return payload.results;
-    return [];
-  }
-
   function pickRandom(arr){
     return arr[Math.floor(Math.random() * arr.length)];
-  }
-
-  // Tries to read a character name from whatever shape the API gives us.
-  // The public schema mostly exposes tags/artist_name, but this stays
-  // defensive in case a "characters" field is present on some images.
-  function extractCharacterName(image){
-    if (Array.isArray(image.characters) && image.characters.length){
-      return image.characters.map(c => (typeof c === "string" ? c : c.name)).filter(Boolean).join(", ");
-    }
-    if (typeof image.character_name === "string" && image.character_name.trim()){
-      return image.character_name.trim();
-    }
-    return null;
   }
 
   /* ============================================================
      DATA FETCHING
      ============================================================ */
 
-  // Grabs one random, SAFE-rated image from the whole catalogue.
-  async function fetchRandomWaifu(){
-    const url = `${API_BASE}/images/random?rating=safe&limit=8`;
-    const payload = await fetchJson(url);
-    const images = toArray(payload).filter(img => img && img.url && img.rating === "safe");
-    if (!images.length){
-      throw new Error("Tidak ada gambar SAFE yang ditemukan, coba lagi.");
+  // Fetch dari Waifu.pics API
+  async function fetchWaifu(category) {
+    try {
+      const url = `${API_BASE}/${category}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      throw new Error(`Gagal mengambil gambar: ${error.message}`);
     }
-    return pickRandom(images);
   }
 
-  // Scans paginated SAFE results looking for artist_name containing
-  // "tsunako", caching every match it finds along the way.
-  async function findTsunakoWaifu(){
-    if (tsunakoCache.length > 1){
-      return pickRandom(tsunakoCache);
-    }
+  // Ambil gambar random dari kategori
+  async function fetchRandomWaifu() {
+    // Pilih kategori random
+    const category = pickRandom(RANDOM_CATEGORIES);
+    const data = await fetchWaifu(category);
+    
+    return {
+      url: data.url,
+      category: category,
+      artist_name: `Waifu.pics (${category})`,
+      id: Date.now().toString(),
+      source_url: data.url
+    };
+  }
 
-    setStatus("Menjelajahi galeri Tsunako…");
-
-    for (let page = 0; page < MAX_SEARCH_PAGES; page++){
-      const offset = page * PAGE_SIZE;
-      const url = `${API_BASE}/images?rating=safe&limit=${PAGE_SIZE}&offset=${offset}`;
-      let payload;
-      try{
-        payload = await fetchJson(url);
-      } catch (err){
-        break; // stop scanning silently, we'll fall back below
-      }
-
-      const images = toArray(payload);
-      if (!images.length) break; // reached the end of the catalogue
-
-      for (const img of images){
-        if (img && typeof img.artist_name === "string" &&
-            img.artist_name.toLowerCase().includes(TSUNAKO_QUERY) &&
-            img.rating === "safe"){
-          tsunakoCache.push(img);
-        }
-      }
-
-      // Stop early once we have a decent pool to randomize from.
-      if (tsunakoCache.length >= 12) break;
-      // Short pages mean we've hit the end of available results.
-      if (images.length < PAGE_SIZE) break;
-    }
-
-    if (!tsunakoCache.length){
-      throw new Error(
-        "Tidak ditemukan gambar dari Tsunako di koleksi Nekos API saat ini."
-      );
-    }
-
-    return pickRandom(tsunakoCache);
+  // Ambil gambar berdasarkan kategori yang dipilih
+  async function fetchCategoryWaifu(category) {
+    const data = await fetchWaifu(category);
+    
+    return {
+      url: data.url,
+      category: category,
+      artist_name: `Waifu.pics (${category})`,
+      id: Date.now().toString(),
+      source_url: data.url
+    };
   }
 
   /* ============================================================
@@ -594,7 +606,7 @@
 
     waifuImg.classList.remove("shown");
     waifuImg.src = image.url;
-    waifuImg.alt = "Ilustrasi waifu" + (image.artist_name ? " oleh " + image.artist_name : "");
+    waifuImg.alt = `Waifu dari kategori ${image.category}`;
 
     waifuImg.onload = () => {
       waifuImg.classList.add("shown");
@@ -604,31 +616,24 @@
       flash.classList.add("play");
     };
 
-    const characterName = extractCharacterName(image);
-    if (characterName){
-      charNameEl.textContent = characterName;
-      charNameEl.style.display = "";
-    } else {
-      charNameEl.style.display = "none";
-    }
+    // Tampilkan nama kategori
+    const categoryName = image.category.charAt(0).toUpperCase() + image.category.slice(1);
+    charNameEl.textContent = categoryName;
+    charNameEl.style.display = "";
 
-    if (image.artist_name){
-      artistNameEl.textContent = "Artis: " + image.artist_name;
-      artistNameEl.style.display = "";
-    } else {
-      artistNameEl.textContent = "Artis tidak diketahui";
-      artistNameEl.style.display = "";
-    }
+    artistNameEl.textContent = `Kategori: ${categoryName}`;
+    artistNameEl.style.display = "";
 
     if (image.source_url){
       sourceLinkEl.href = image.source_url;
+      sourceLinkEl.textContent = "Lihat gambar →";
       sourceLinkEl.style.display = "";
     } else {
       sourceLinkEl.style.display = "none";
     }
 
     metaOverlay.classList.add("show");
-    lastShownId = image.id;
+    lastShownUrl = image.url;
   }
 
   /* ============================================================
@@ -644,22 +649,22 @@
       const mode = artistSelect.value;
       let image;
 
-      if (mode === "tsunako"){
-        image = await findTsunakoWaifu();
+      if (mode === "random"){
+        image = await fetchRandomWaifu();
       } else {
+        image = await fetchCategoryWaifu(mode);
+      }
+
+      // Avoid showing the exact same image twice in a row
+      if (image.url === lastShownUrl && mode === "random") {
+        // Retry once with different category
         image = await fetchRandomWaifu();
       }
 
-      // Avoid showing the exact same image twice in a row when possible.
-      if (image.id === lastShownId && mode === "tsunako" && tsunakoCache.length > 1){
-        const alt = tsunakoCache.find(img => img.id !== lastShownId);
-        if (alt) image = alt;
-      }
-
       renderWaifu(image);
-      setStatus(mode === "tsunako"
-        ? "Waifu dari Tsunako berhasil dipanggil! ✨"
-        : "Waifu berhasil dipanggil! ✨");
+      
+      const categoryDisplay = image.category.charAt(0).toUpperCase() + image.category.slice(1);
+      setStatus(`${categoryDisplay} berhasil dipanggil! ✨`);
     } catch (err){
       console.error(err);
       setStatus(err.message || "Gagal memanggil waifu, coba lagi.", true);
@@ -670,14 +675,9 @@
 
   generateBtn.addEventListener("click", handleGenerate);
 
-  // Reset the Tsunako cache if the user switches artist mode, so a
-  // fresh scan can happen (cheap safeguard against stale state).
-  artistSelect.addEventListener("change", () => {
-    if (artistSelect.value !== "tsunako"){
-      // Keep cache around, it's harmless and saves a re-scan if they
-      // switch back — only random mode never needs it.
-    }
-  });
+  // Auto-generate on page load (optional)
+  // Uncomment if you want a waifu to appear immediately
+  // setTimeout(handleGenerate, 500);
 })();
 </script>
 </body>
