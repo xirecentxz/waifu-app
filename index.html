@@ -147,14 +147,7 @@
     color: var(--muted-dim);
   }
 
-  .artist-input-wrapper {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  select#artistSelect{
+  select#categorySelect{
     appearance:none;
     -webkit-appearance:none;
     background: rgba(255,255,255,0.04);
@@ -170,37 +163,17 @@
     background-repeat: no-repeat;
     background-position: right 14px center;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    flex: 1;
-    min-width: 150px;
+    width: 100%;
   }
 
-  select#artistSelect:focus-visible,
+  select#categorySelect:focus-visible,
   #generateBtn:focus-visible{
     outline: 2px solid var(--cyan);
     outline-offset: 2px;
   }
 
-  select#artistSelect:hover{
+  select#categorySelect:hover{
     border-color: var(--cyan-soft);
-  }
-
-  #customArtistInput {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--line);
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: 14px;
-    padding: 10px 14px;
-    border-radius: var(--radius-sm);
-    flex: 1;
-    min-width: 120px;
-    display: none;
-    transition: border-color 0.2s ease;
-  }
-
-  #customArtistInput:focus {
-    border-color: var(--cyan);
-    outline: none;
   }
 
   #generateBtn{
@@ -401,9 +374,6 @@
   @media (max-width: 420px){
     .panel{ padding:16px; }
     h1{ font-size: 30px; }
-    .artist-input-wrapper { flex-direction: column; }
-    select#artistSelect { min-width: 100%; }
-    #customArtistInput { min-width: 100%; }
   }
 </style>
 </head>
@@ -411,21 +381,43 @@
 
   <p class="eyebrow">✦ Gacha Summoning Circle ✦</p>
   <h1>Who is Your Waifu?</h1>
-  <p class="subtitle">Putar lingkaran pemanggilan dan temukan waifu-mu berikutnya! Pilih ilustrator favorit atau mode random.</p>
+  <p class="subtitle">Pilih kategori waifu favoritmu, tekan tombol, dan saksikan lingkaran pemanggilan bekerja! ✨</p>
 
   <div class="panel">
     <div class="field">
-      <label for="artistSelect">Pilih Ilustrator</label>
-      <div class="artist-input-wrapper">
-        <select id="artistSelect">
-          <option value="random">🎲 Random (semua artis)</option>
-          <option value="tsunako">✨ Tsunako</option>
-          <option value="misaki_kurehito">🌸 Misaki Kurehito</option>
-          <option value="kantoku">🌟 Kantoku</option>
-          <option value="custom">✏️ Custom (ketik sendiri)</option>
-        </select>
-        <input type="text" id="customArtistInput" placeholder="Nama ilustrator..." />
-      </div>
+      <label for="categorySelect">Pilih Kategori</label>
+      <select id="categorySelect">
+        <option value="random">🎲 Random</option>
+        <option value="waifu">💕 Waifu</option>
+        <option value="neko">🐱 Neko (Cat Girl)</option>
+        <option value="shinobu">🦋 Shinobu</option>
+        <option value="megumin">🧙 Megumin</option>
+        <option value="bully">😈 Bully</option>
+        <option value="cuddle">🤗 Cuddle</option>
+        <option value="cry">😢 Cry</option>
+        <option value="hug">🤗 Hug</option>
+        <option value="awoo">🐺 Awoo</option>
+        <option value="kiss">💋 Kiss</option>
+        <option value="lick">👅 Lick</option>
+        <option value="pat">🖐️ Pat</option>
+        <option value="smug">😏 Smug</option>
+        <option value="bonk">🔨 Bonk</option>
+        <option value="yeet">🚀 Yeet</option>
+        <option value="blush">😊 Blush</option>
+        <option value="smile">😄 Smile</option>
+        <option value="wave">👋 Wave</option>
+        <option value="highfive">✋ Highfive</option>
+        <option value="handhold">🤝 Handhold</option>
+        <option value="nom">🍽️ Nom</option>
+        <option value="bite">🦷 Bite</option>
+        <option value="glomp">🤗 Glomp</option>
+        <option value="slap">✋ Slap</option>
+        <option value="happy">😊 Happy</option>
+        <option value="wink">😉 Wink</option>
+        <option value="poke">☝️ Poke</option>
+        <option value="dance">💃 Dance</option>
+        <option value="cringe">😬 Cringe</option>
+      </select>
     </div>
     <button id="generateBtn" type="button">🎴 Panggil Waifu</button>
   </div>
@@ -442,10 +434,10 @@
       <img id="waifuImg" alt="">
       <div class="flash" id="flash"></div>
       <div class="meta-overlay" id="metaOverlay">
-        <span class="rating-badge" id="ratingBadge">✓ SAFE</span>
+        <span class="rating-badge" id="ratingBadge">✓ SFW</span>
         <p class="char-name" id="charName"></p>
         <p class="artist-name" id="artistName"></p>
-        <a class="source-link" id="sourceLink" href="#" target="_blank" rel="noopener noreferrer">Lihat sumber asli →</a>
+        <a class="source-link" id="sourceLink" href="#" target="_blank" rel="noopener noreferrer">Lihat gambar →</a>
       </div>
     </div>
   </div>
@@ -453,7 +445,7 @@
   <p class="status" id="status"></p>
 
   <footer>
-    Digerakkan oleh <a href="https://nekosapi.com" target="_blank" rel="noopener noreferrer">Nekos API</a> · Semua gambar milik senimannya masing-masing.
+    Digerakkan oleh <a href="https://waifu.pics" target="_blank" rel="noopener noreferrer">Waifu.pics</a> · Semua gambar milik senimannya masing-masing.
   </footer>
 
 <script>
@@ -461,21 +453,18 @@
   "use strict";
 
   /* ============================================================
-     KONFIGURASI - Menggunakan multiple proxy untuk redundancy
+     KONFIGURASI - Waifu.pics API (100% CORS friendly)
      ============================================================ */
-  const PROXIES = [
-    'https://corsproxy.io/?',
-    'https://api.allorigins.win/raw?url=',
-    'https://cors-anywhere.herokuapp.com/'
-  ];
+  const API_BASE = "https://api.waifu.pics/sfw";
   
-  let currentProxyIndex = 0;
-  const API_BASE = 'https://api.nekosapi.com/v4';
-  const PAGE_SIZE = 100;
-  const MAX_SEARCH_PAGES = 10;
+  const CATEGORIES = [
+    'waifu', 'neko', 'shinobu', 'megumin', 'bully', 'cuddle', 'cry',
+    'hug', 'awoo', 'kiss', 'lick', 'pat', 'smug', 'bonk', 'yeet',
+    'blush', 'smile', 'wave', 'highfive', 'handhold', 'nom', 'bite',
+    'glomp', 'slap', 'happy', 'wink', 'poke', 'dance', 'cringe'
+  ];
 
-  const artistSelect = document.getElementById("artistSelect");
-  const customArtistInput = document.getElementById("customArtistInput");
+  const categorySelect = document.getElementById("categorySelect");
   const generateBtn  = document.getElementById("generateBtn");
   const stage        = document.getElementById("stage");
   const card         = document.getElementById("card");
@@ -488,10 +477,7 @@
   const sourceLinkEl = document.getElementById("sourceLink");
   const statusEl     = document.getElementById("status");
 
-  let artistCache = {};
-  let lastShownId = null;
-  let currentSearchTerm = '';
-  let retryCount = 0;
+  let lastShownUrl = null;
 
   /* ============================================================
      HELPERS
@@ -507,152 +493,79 @@
     stage.classList.toggle("charging", isLoading);
   }
 
-  function withCacheBust(url){
-    const glue = url.includes("?") ? "&" : "?";
-    return url + glue + "_=" + Date.now() + Math.random().toString(16).slice(2);
-  }
-
-  // Try multiple proxies if one fails
-  async function fetchWithProxy(url, retries = 3) {
-    for (let attempt = 0; attempt < retries; attempt++) {
-      try {
-        const proxy = PROXIES[currentProxyIndex % PROXIES.length];
-        const proxyUrl = proxy + encodeURIComponent(url);
-        const finalUrl = withCacheBust(proxyUrl);
-        
-        const response = await fetch(finalUrl, { 
-          headers: { "Accept": "application/json" },
-          timeout: 10000
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        console.warn(`Proxy ${currentProxyIndex} failed:`, error);
-        currentProxyIndex++;
-        if (attempt === retries - 1) throw error;
-      }
-    }
-  }
-
-  async function fetchJson(url){
-    try {
-      const data = await fetchWithProxy(url, 3);
-      return data;
-    } catch (error) {
-      throw new Error(`Gagal menghubungi API: ${error.message}`);
-    }
-  }
-
-  function toArray(payload){
-    if (Array.isArray(payload)) return payload;
-    if (payload && Array.isArray(payload.data)) return payload.data;
-    if (payload && Array.isArray(payload.items)) return payload.items;
-    if (payload && Array.isArray(payload.results)) return payload.results;
-    return [];
-  }
-
   function pickRandom(arr){
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
-  function extractCharacterName(image){
-    if (Array.isArray(image.characters) && image.characters.length){
-      return image.characters.map(c => (typeof c === "string" ? c : c.name)).filter(Boolean).join(", ");
-    }
-    if (typeof image.character_name === "string" && image.character_name.trim()){
-      return image.character_name.trim();
-    }
-    return null;
-  }
-
-  function getSearchTerm() {
-    const mode = artistSelect.value;
-    if (mode === 'random') return null;
-    if (mode === 'custom') {
-      const custom = customArtistInput.value.trim();
-      return custom || null;
-    }
-    // Convert option values to search terms
-    const termMap = {
-      'tsunako': 'tsunako',
-      'misaki_kurehito': 'misaki kurehito',
-      'kantoku': 'kantoku'
+  function getCategoryName(category) {
+    const names = {
+      'waifu': 'Waifu',
+      'neko': 'Neko (Cat Girl)',
+      'shinobu': 'Shinobu',
+      'megumin': 'Megumin',
+      'bully': 'Bully',
+      'cuddle': 'Cuddle',
+      'cry': 'Cry',
+      'hug': 'Hug',
+      'awoo': 'Awoo',
+      'kiss': 'Kiss',
+      'lick': 'Lick',
+      'pat': 'Pat',
+      'smug': 'Smug',
+      'bonk': 'Bonk',
+      'yeet': 'Yeet',
+      'blush': 'Blush',
+      'smile': 'Smile',
+      'wave': 'Wave',
+      'highfive': 'Highfive',
+      'handhold': 'Handhold',
+      'nom': 'Nom',
+      'bite': 'Bite',
+      'glomp': 'Glomp',
+      'slap': 'Slap',
+      'happy': 'Happy',
+      'wink': 'Wink',
+      'poke': 'Poke',
+      'dance': 'Dance',
+      'cringe': 'Cringe'
     };
-    return termMap[mode] || null;
+    return names[category] || category;
   }
 
   /* ============================================================
-     DATA FETCHING
+     API FETCHING
      ============================================================ */
 
-  async function fetchRandomWaifu(){
-    const url = `${API_BASE}/images/random?rating=safe&limit=8`;
-    const payload = await fetchJson(url);
-    const images = toArray(payload).filter(img => img && img.url && img.rating === "safe");
-    if (!images.length){
-      throw new Error("Tidak ada gambar SAFE yang ditemukan.");
+  async function fetchWaifu(category) {
+    try {
+      const url = `${API_BASE}/${category}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.url) {
+        throw new Error('Tidak ada gambar ditemukan');
+      }
+      
+      return {
+        url: data.url,
+        category: category,
+        artist_name: `Waifu.pics - ${getCategoryName(category)}`,
+        id: Date.now().toString(),
+        source_url: data.url
+      };
+    } catch (error) {
+      throw new Error(`Gagal mengambil gambar: ${error.message}`);
     }
-    return pickRandom(images);
   }
 
-  async function fetchWaifuByArtist(artistName){
-    const cacheKey = artistName.toLowerCase().trim();
-    
-    // Return from cache if available
-    if (artistCache[cacheKey] && artistCache[cacheKey].length > 0) {
-      let candidates = artistCache[cacheKey];
-      if (candidates.length > 1 && lastShownId) {
-        candidates = candidates.filter(img => img.id !== lastShownId);
-      }
-      if (candidates.length > 0) {
-        return pickRandom(candidates);
-      }
-    }
-
-    setStatus(`Mencari ilustrator: ${artistName}...`);
-
-    let foundImages = [];
-    
-    for (let page = 0; page < MAX_SEARCH_PAGES; page++) {
-      const offset = page * PAGE_SIZE;
-      const url = `${API_BASE}/images?rating=safe&limit=${PAGE_SIZE}&offset=${offset}`;
-      
-      let payload;
-      try {
-        payload = await fetchJson(url);
-      } catch (err) {
-        console.warn('Page fetch failed:', err);
-        break;
-      }
-
-      const images = toArray(payload);
-      if (!images.length) break;
-
-      for (const img of images) {
-        if (img && typeof img.artist_name === 'string' && img.rating === 'safe') {
-          const artistLower = img.artist_name.toLowerCase();
-          if (artistLower.includes(cacheKey)) {
-            foundImages.push(img);
-          }
-        }
-      }
-
-      if (foundImages.length >= 12) break;
-      if (images.length < PAGE_SIZE) break;
-    }
-
-    artistCache[cacheKey] = foundImages;
-
-    if (!foundImages.length) {
-      throw new Error(`Tidak ditemukan gambar dari "${artistName}" di koleksi Nekos API.`);
-    }
-
-    return pickRandom(foundImages);
+  async function fetchRandomWaifu() {
+    const category = pickRandom(CATEGORIES);
+    return await fetchWaifu(category);
   }
 
   /* ============================================================
@@ -664,7 +577,7 @@
 
     waifuImg.classList.remove("shown");
     waifuImg.src = image.url;
-    waifuImg.alt = "Ilustrasi waifu" + (image.artist_name ? " oleh " + image.artist_name : "");
+    waifuImg.alt = `Waifu dari kategori ${image.category}`;
 
     waifuImg.onload = () => {
       waifuImg.classList.add("shown");
@@ -677,42 +590,24 @@
       setStatus("Gambar gagal dimuat, coba lagi.", true);
     };
 
-    const characterName = extractCharacterName(image);
-    charNameEl.textContent = characterName || "Waifu";
+    const categoryDisplay = getCategoryName(image.category);
+    charNameEl.textContent = categoryDisplay;
     charNameEl.style.display = "";
 
-    artistNameEl.textContent = image.artist_name ? "✏️ " + image.artist_name : "Artis tidak diketahui";
+    artistNameEl.textContent = `🎨 Kategori: ${categoryDisplay}`;
     artistNameEl.style.display = "";
 
     if (image.source_url){
       sourceLinkEl.href = image.source_url;
+      sourceLinkEl.textContent = "🔗 Lihat gambar asli →";
       sourceLinkEl.style.display = "";
     } else {
       sourceLinkEl.style.display = "none";
     }
 
     metaOverlay.classList.add("show");
-    lastShownId = image.id;
+    lastShownUrl = image.url;
   }
-
-  /* ============================================================
-     UI CONTROLS
-     ============================================================ */
-
-  artistSelect.addEventListener("change", () => {
-    if (artistSelect.value === "custom") {
-      customArtistInput.style.display = "block";
-      customArtistInput.focus();
-    } else {
-      customArtistInput.style.display = "none";
-    }
-  });
-
-  customArtistInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      handleGenerate();
-    }
-  });
 
   /* ============================================================
      MAIN ACTION
@@ -722,25 +617,26 @@
     setLoading(true);
     setStatus("Memanggil dari alam waifu…");
     metaOverlay.classList.remove("show");
-    retryCount = 0;
 
     try {
-      const searchTerm = getSearchTerm();
+      const mode = categorySelect.value;
       let image;
 
-      if (!searchTerm) {
+      if (mode === "random"){
         image = await fetchRandomWaifu();
       } else {
-        image = await fetchWaifuByArtist(searchTerm);
+        image = await fetchWaifu(mode);
+      }
+
+      // Avoid showing the exact same image twice in a row
+      if (image.url === lastShownUrl && mode === "random") {
+        image = await fetchRandomWaifu();
       }
 
       renderWaifu(image);
       
-      if (searchTerm) {
-        setStatus(`Waifu dari "${searchTerm}" berhasil dipanggil! ✨`);
-      } else {
-        setStatus("Waifu berhasil dipanggil! ✨");
-      }
+      const categoryDisplay = getCategoryName(image.category);
+      setStatus(`✨ ${categoryDisplay} berhasil dipanggil! ✨`);
     } catch (err) {
       console.error(err);
       setStatus(err.message || "Gagal memanggil waifu, coba lagi.", true);
@@ -750,6 +646,11 @@
   }
 
   generateBtn.addEventListener("click", handleGenerate);
+
+  // Auto-generate pertama kali setelah 1 detik
+  setTimeout(() => {
+    handleGenerate();
+  }, 1000);
 
 })();
 </script>
