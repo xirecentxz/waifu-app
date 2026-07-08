@@ -12,7 +12,7 @@
 
 <style>
   /* ============================================================
-     DESIGN TOKENS
+     DESIGN TOKENS (Sama seperti sebelumnya)
      ============================================================ */
   :root{
     --bg-deep:      #0a0817;
@@ -389,25 +389,18 @@
       <select id="categorySelect">
         <option value="random">🎲 Random</option>
         <option value="waifu">💕 Waifu</option>
-        <option value="neko">🐱 Neko (Cat Girl)</option>
-        <option value="shinobu">🦋 Shinobu</option>
-        <option value="megumin">🧙 Megumin</option>
-        <option value="bully">😈 Bully</option>
-        <option value="cuddle">🤗 Cuddle</option>
-        <option value="cry">😢 Cry</option>
+        <option value="neko">🐱 Neko</option>
+        <option value="fox_girl">🦊 Fox Girl</option>
         <option value="hug">🤗 Hug</option>
-        <option value="awoo">🐺 Awoo</option>
         <option value="kiss">💋 Kiss</option>
-        <option value="lick">👅 Lick</option>
         <option value="pat">🖐️ Pat</option>
         <option value="smug">😏 Smug</option>
-        <option value="bonk">🔨 Bonk</option>
-        <option value="yeet">🚀 Yeet</option>
+        <option value="cuddle">🤗 Cuddle</option>
+        <option value="cry">😢 Cry</option>
         <option value="blush">😊 Blush</option>
         <option value="smile">😄 Smile</option>
         <option value="wave">👋 Wave</option>
-        <option value="highfive">✋ Highfive</option>
-        <option value="handhold">🤝 Handhold</option>
+        <option value="tickle">🤭 Tickle</option>
         <option value="nom">🍽️ Nom</option>
         <option value="bite">🦷 Bite</option>
         <option value="glomp">🤗 Glomp</option>
@@ -416,7 +409,7 @@
         <option value="wink">😉 Wink</option>
         <option value="poke">☝️ Poke</option>
         <option value="dance">💃 Dance</option>
-        <option value="cringe">😬 Cringe</option>
+        <option value="baka">😝 Baka</option>
       </select>
     </div>
     <button id="generateBtn" type="button">🎴 Panggil Waifu</button>
@@ -445,7 +438,7 @@
   <p class="status" id="status"></p>
 
   <footer>
-    Digerakkan oleh <a href="https://waifu.pics" target="_blank" rel="noopener noreferrer">Waifu.pics</a> · Semua gambar milik senimannya masing-masing.
+    Digerakkan oleh <a href="https://nekos.life" target="_blank" rel="noopener noreferrer">Nekos.life</a> · Semua gambar milik senimannya masing-masing.
   </footer>
 
 <script>
@@ -453,15 +446,14 @@
   "use strict";
 
   /* ============================================================
-     KONFIGURASI - Waifu.pics API (100% CORS friendly)
+     KONFIGURASI - Nekos.life API (CORS friendly & stabil)
      ============================================================ */
-  const API_BASE = "https://api.waifu.pics/sfw";
+  const API_BASE = "https://nekos.life/api/v2/img";
   
   const CATEGORIES = [
-    'waifu', 'neko', 'shinobu', 'megumin', 'bully', 'cuddle', 'cry',
-    'hug', 'awoo', 'kiss', 'lick', 'pat', 'smug', 'bonk', 'yeet',
-    'blush', 'smile', 'wave', 'highfive', 'handhold', 'nom', 'bite',
-    'glomp', 'slap', 'happy', 'wink', 'poke', 'dance', 'cringe'
+    'waifu', 'neko', 'fox_girl', 'hug', 'kiss', 'pat', 'smug',
+    'cuddle', 'cry', 'blush', 'smile', 'wave', 'tickle', 'nom',
+    'bite', 'glomp', 'slap', 'happy', 'wink', 'poke', 'dance', 'baka'
   ];
 
   const categorySelect = document.getElementById("categorySelect");
@@ -500,25 +492,18 @@
   function getCategoryName(category) {
     const names = {
       'waifu': 'Waifu',
-      'neko': 'Neko (Cat Girl)',
-      'shinobu': 'Shinobu',
-      'megumin': 'Megumin',
-      'bully': 'Bully',
-      'cuddle': 'Cuddle',
-      'cry': 'Cry',
+      'neko': 'Neko',
+      'fox_girl': 'Fox Girl',
       'hug': 'Hug',
-      'awoo': 'Awoo',
       'kiss': 'Kiss',
-      'lick': 'Lick',
       'pat': 'Pat',
       'smug': 'Smug',
-      'bonk': 'Bonk',
-      'yeet': 'Yeet',
+      'cuddle': 'Cuddle',
+      'cry': 'Cry',
       'blush': 'Blush',
       'smile': 'Smile',
       'wave': 'Wave',
-      'highfive': 'Highfive',
-      'handhold': 'Handhold',
+      'tickle': 'Tickle',
       'nom': 'Nom',
       'bite': 'Bite',
       'glomp': 'Glomp',
@@ -527,7 +512,7 @@
       'wink': 'Wink',
       'poke': 'Poke',
       'dance': 'Dance',
-      'cringe': 'Cringe'
+      'baka': 'Baka'
     };
     return names[category] || category;
   }
@@ -554,7 +539,7 @@
       return {
         url: data.url,
         category: category,
-        artist_name: `Waifu.pics - ${getCategoryName(category)}`,
+        artist_name: `Nekos.life - ${getCategoryName(category)}`,
         id: Date.now().toString(),
         source_url: data.url
       };
