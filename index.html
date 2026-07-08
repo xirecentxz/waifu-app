@@ -12,7 +12,7 @@
 
 <style>
   /* ============================================================
-     DESIGN TOKENS (Sama seperti sebelumnya)
+     DESIGN TOKENS
      ============================================================ */
   :root{
     --bg-deep:      #0a0817;
@@ -229,8 +229,9 @@
   .ring.r2{ width:98%;  height: 80%; border-style: solid; border-width:1px; animation-duration: 14s; animation-direction: reverse; }
   .ring.r3{ width:84%;  height: 68%; animation-duration: 9s; }
 
-  .stage.charging .ring{ animation-duration: 1.1s; }
-  .stage.charging .ring.r2{ animation-duration: 0.8s; }
+  .stage.charging .ring{ animation-duration: 0.8s; }
+  .stage.charging .ring.r2{ animation-duration: 0.6s; }
+  .stage.charging .ring.r3{ animation-duration: 0.4s; }
 
   @keyframes spin{
     from{ transform: rotate(0deg); }
@@ -354,6 +355,10 @@
     margin-bottom: 20px;
   }
   .status.is-error{ color: #ff8fa8; }
+  .status .api-name{
+    color: var(--cyan);
+    font-weight: 600;
+  }
 
   footer{
     margin-top: auto;
@@ -365,10 +370,20 @@
   footer a{ color: var(--muted); }
   footer a:hover{ color: var(--cyan); }
 
+  /* Animasi tambahan */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  .glyph {
+    animation: float 3s ease-in-out infinite;
+  }
+
   @media (prefers-reduced-motion: reduce){
     .ring{ animation: none; }
     .card img, .meta-overlay, #generateBtn{ transition: none; }
     .flash.play{ animation: none; }
+    .glyph { animation: none; }
   }
 
   @media (max-width: 420px){
@@ -430,7 +445,7 @@
         <span class="rating-badge" id="ratingBadge">✓ SFW</span>
         <p class="char-name" id="charName"></p>
         <p class="artist-name" id="artistName"></p>
-        <a class="source-link" id="sourceLink" href="#" target="_blank" rel="noopener noreferrer">Lihat gambar →</a>
+        <a class="source-link" id="sourceLink" href="#" target="_blank" rel="noopener noreferrer">🔗 Lihat gambar asli →</a>
       </div>
     </div>
   </div>
@@ -446,7 +461,7 @@
   "use strict";
 
   /* ============================================================
-     KONFIGURASI - Nekos.life API (CORS friendly & stabil)
+     KONFIGURASI - Nekos.life API (WORKING!)
      ============================================================ */
   const API_BASE = "https://nekos.life/api/v2/img";
   
@@ -470,6 +485,7 @@
   const statusEl     = document.getElementById("status");
 
   let lastShownUrl = null;
+  let isFirstLoad = true;
 
   /* ============================================================
      HELPERS
@@ -524,6 +540,8 @@
   async function fetchWaifu(category) {
     try {
       const url = `${API_BASE}/${category}`;
+      console.log(`📡 Fetching: ${url}`);
+      
       const response = await fetch(url);
       
       if (!response.ok) {
@@ -531,6 +549,7 @@
       }
       
       const data = await response.json();
+      console.log(`✅ Response:`, data);
       
       if (!data.url) {
         throw new Error('Tidak ada gambar ditemukan');
@@ -544,6 +563,7 @@
         source_url: data.url
       };
     } catch (error) {
+      console.error(`❌ Error fetching ${category}:`, error);
       throw new Error(`Gagal mengambil gambar: ${error.message}`);
     }
   }
@@ -560,26 +580,35 @@
   function renderWaifu(image){
     placeholder.style.display = "none";
 
+    // Reset image
     waifuImg.classList.remove("shown");
+    waifuImg.src = "";
+    
+    // Set new image
     waifuImg.src = image.url;
     waifuImg.alt = `Waifu dari kategori ${image.category}`;
 
     waifuImg.onload = () => {
+      console.log(`🖼️ Image loaded: ${image.url}`);
       waifuImg.classList.add("shown");
+      
+      // Trigger flash effect
       flash.classList.remove("play");
-      void flash.offsetWidth;
+      void flash.offsetWidth; // Force reflow
       flash.classList.add("play");
     };
 
     waifuImg.onerror = () => {
+      console.error(`❌ Image failed to load: ${image.url}`);
       setStatus("Gambar gagal dimuat, coba lagi.", true);
     };
 
+    // Update metadata
     const categoryDisplay = getCategoryName(image.category);
     charNameEl.textContent = categoryDisplay;
     charNameEl.style.display = "";
 
-    artistNameEl.textContent = `🎨 Kategori: ${categoryDisplay}`;
+    artistNameEl.textContent = `🎨 ${categoryDisplay}`;
     artistNameEl.style.display = "";
 
     if (image.source_url){
@@ -600,7 +629,7 @@
 
   async function handleGenerate(){
     setLoading(true);
-    setStatus("Memanggil dari alam waifu…");
+    setStatus("🔄 Memanggil dari alam waifu…");
     metaOverlay.classList.remove("show");
 
     try {
@@ -613,8 +642,9 @@
         image = await fetchWaifu(mode);
       }
 
-      // Avoid showing the exact same image twice in a row
+      // Avoid showing the exact same image twice in a row (only for random)
       if (image.url === lastShownUrl && mode === "random") {
+        console.log('🔄 Same image, fetching another...');
         image = await fetchRandomWaifu();
       }
 
@@ -622,20 +652,45 @@
       
       const categoryDisplay = getCategoryName(image.category);
       setStatus(`✨ ${categoryDisplay} berhasil dipanggil! ✨`);
+      
+      // Add confetti effect (optional)
+      // createConfetti();
+      
     } catch (err) {
-      console.error(err);
-      setStatus(err.message || "Gagal memanggil waifu, coba lagi.", true);
+      console.error('❌ Error:', err);
+      setStatus(`❌ ${err.message || "Gagal memanggil waifu, coba lagi."}`, true);
     } finally {
       setLoading(false);
     }
   }
 
+  /* ============================================================
+     EVENT LISTENERS
+     ============================================================ */
+
   generateBtn.addEventListener("click", handleGenerate);
 
-  // Auto-generate pertama kali setelah 1 detik
+  // Keyboard shortcut: Enter to generate
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !generateBtn.disabled) {
+      handleGenerate();
+    }
+  });
+
+  /* ============================================================
+     AUTO-GENERATE PERTAMA KALI
+     ============================================================ */
+  
+  // Tunggu 1 detik lalu generate waifu pertama
   setTimeout(() => {
-    handleGenerate();
+    if (isFirstLoad) {
+      isFirstLoad = false;
+      handleGenerate();
+    }
   }, 1000);
+
+  console.log('🎴 Who is Your Waifu? — Summoning Circle ready!');
+  console.log(`📚 Available categories: ${CATEGORIES.join(', ')}`);
 
 })();
 </script>
