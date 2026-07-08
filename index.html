@@ -147,33 +147,88 @@
     color: var(--muted-dim);
   }
 
-  select#categorySelect{
-    appearance:none;
-    -webkit-appearance:none;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--line);
+  /* ============================================================
+     GLASSMORPHISM SELECT DROPDOWN
+     ============================================================ */
+  .select-wrapper {
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+  }
+
+  .select-wrapper:hover {
+    border-color: rgba(71, 232, 212, 0.4);
+    box-shadow: 0 0 20px rgba(71, 232, 212, 0.05);
+  }
+
+  .select-wrapper:focus-within {
+    border-color: var(--cyan);
+    box-shadow: 0 0 25px rgba(71, 232, 212, 0.1);
+  }
+
+  .select-wrapper select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: none;
     color: var(--text);
     font-family: var(--font-body);
-    font-weight:600;
-    font-size:15px;
-    padding: 12px 40px 12px 14px;
-    border-radius: var(--radius-sm);
-    cursor:pointer;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9' fill='none'><path d='M1 1L7 7L13 1' stroke='%2347e8d4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 12px 45px 12px 16px;
     width: 100%;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+    outline: none;
   }
 
-  select#categorySelect:focus-visible,
-  #generateBtn:focus-visible{
-    outline: 2px solid var(--cyan);
-    outline-offset: 2px;
+  .select-wrapper select option {
+    background: #1a1436;
+    color: var(--text);
+    padding: 10px;
   }
 
-  select#categorySelect:hover{
-    border-color: var(--cyan-soft);
+  /* Custom arrow */
+  .select-wrapper::after {
+    content: "▾";
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--cyan);
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 1;
+    transition: transform 0.3s ease;
+  }
+
+  .select-wrapper:hover::after {
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  /* Glass reflection effect */
+  .select-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transform: skewX(-25deg);
+    pointer-events: none;
+    z-index: 0;
+    transition: left 0.6s ease;
+  }
+
+  .select-wrapper:hover::before {
+    left: 150%;
   }
 
   #generateBtn{
@@ -370,7 +425,6 @@
   footer a{ color: var(--muted); }
   footer a:hover{ color: var(--cyan); }
 
-  /* Animasi tambahan */
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }
@@ -384,6 +438,7 @@
     .card img, .meta-overlay, #generateBtn{ transition: none; }
     .flash.play{ animation: none; }
     .glyph { animation: none; }
+    .select-wrapper::before { display: none; }
   }
 
   @media (max-width: 420px){
@@ -401,21 +456,23 @@
   <div class="panel">
     <div class="field">
       <label for="categorySelect">Pilih Kategori</label>
-      <select id="categorySelect">
-        <option value="random">🎲 Random</option>
-        <option value="waifu">💕 Waifu</option>
-        <option value="neko">🐱 Neko</option>
-        <option value="hug">🤗 Hug</option>
-        <option value="kiss">💋 Kiss</option>
-        <option value="pat">🖐️ Pat</option>
-        <option value="smug">😏 Smug</option>
-        <option value="cuddle">🤗 Cuddle</option>
-        <option value="cry">😢 Cry</option>
-        <option value="wave">👋 Wave</option>
-        <option value="tickle">🤭 Tickle</option>
-
-
-      </select>
+      
+      <!-- GLASSMORPHISM SELECT WRAPPER -->
+      <div class="select-wrapper">
+        <select id="categorySelect">
+          <option value="random">🎲 Random</option>
+          <option value="waifu">💕 Waifu</option>
+          <option value="neko">🐱 Neko</option>
+          <option value="hug">🤗 Hug</option>
+          <option value="kiss">💋 Kiss</option>
+          <option value="pat">🖐️ Pat</option>
+          <option value="smug">😏 Smug</option>
+          <option value="cuddle">🤗 Cuddle</option>
+          <option value="cry">😢 Cry</option>
+          <option value="wave">👋 Wave</option>
+          <option value="tickle">🤭 Tickle</option>
+        </select>
+      </div>
     </div>
     <button id="generateBtn" type="button">🎴 Panggil Waifu</button>
   </div>
@@ -451,14 +508,13 @@
   "use strict";
 
   /* ============================================================
-     KONFIGURASI - Nekos.life API (WORKING!)
+     KONFIGURASI - Nekos.life API
      ============================================================ */
   const API_BASE = "https://nekos.life/api/v2/img";
   
   const CATEGORIES = [
-    'waifu', 'neko', 'fox_girl', 'hug', 'kiss', 'pat', 'smug',
-    'cuddle', 'cry', 'blush', 'smile', 'wave', 'tickle', 'nom',
-    'bite', 'glomp', 'slap', 'happy', 'wink', 'poke', 'dance', 'baka'
+    'waifu', 'neko', 'hug', 'kiss', 'pat', 'smug',
+    'cuddle', 'cry', 'wave', 'tickle'
   ];
 
   const categorySelect = document.getElementById("categorySelect");
@@ -499,26 +555,14 @@
     const names = {
       'waifu': 'Waifu',
       'neko': 'Neko',
-      'fox_girl': 'Fox Girl',
       'hug': 'Hug',
       'kiss': 'Kiss',
       'pat': 'Pat',
       'smug': 'Smug',
       'cuddle': 'Cuddle',
       'cry': 'Cry',
-      'blush': 'Blush',
-      'smile': 'Smile',
       'wave': 'Wave',
-      'tickle': 'Tickle',
-      'nom': 'Nom',
-      'bite': 'Bite',
-      'glomp': 'Glomp',
-      'slap': 'Slap',
-      'happy': 'Happy',
-      'wink': 'Wink',
-      'poke': 'Poke',
-      'dance': 'Dance',
-      'baka': 'Baka'
+      'tickle': 'Tickle'
     };
     return names[category] || category;
   }
@@ -570,11 +614,9 @@
   function renderWaifu(image){
     placeholder.style.display = "none";
 
-    // Reset image
     waifuImg.classList.remove("shown");
     waifuImg.src = "";
     
-    // Set new image
     waifuImg.src = image.url;
     waifuImg.alt = `Waifu dari kategori ${image.category}`;
 
@@ -582,9 +624,8 @@
       console.log(`🖼️ Image loaded: ${image.url}`);
       waifuImg.classList.add("shown");
       
-      // Trigger flash effect
       flash.classList.remove("play");
-      void flash.offsetWidth; // Force reflow
+      void flash.offsetWidth;
       flash.classList.add("play");
     };
 
@@ -593,7 +634,6 @@
       setStatus("Gambar gagal dimuat, coba lagi.", true);
     };
 
-    // Update metadata
     const categoryDisplay = getCategoryName(image.category);
     charNameEl.textContent = categoryDisplay;
     charNameEl.style.display = "";
@@ -632,7 +672,6 @@
         image = await fetchWaifu(mode);
       }
 
-      // Avoid showing the exact same image twice in a row (only for random)
       if (image.url === lastShownUrl && mode === "random") {
         console.log('🔄 Same image, fetching another...');
         image = await fetchRandomWaifu();
@@ -642,9 +681,6 @@
       
       const categoryDisplay = getCategoryName(image.category);
       setStatus(`✨ ${categoryDisplay} berhasil dipanggil! ✨`);
-      
-      // Add confetti effect (optional)
-      // createConfetti();
       
     } catch (err) {
       console.error('❌ Error:', err);
@@ -660,7 +696,6 @@
 
   generateBtn.addEventListener("click", handleGenerate);
 
-  // Keyboard shortcut: Enter to generate
   document.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !generateBtn.disabled) {
       handleGenerate();
@@ -671,7 +706,6 @@
      AUTO-GENERATE PERTAMA KALI
      ============================================================ */
   
-  // Tunggu 1 detik lalu generate waifu pertama
   setTimeout(() => {
     if (isFirstLoad) {
       isFirstLoad = false;
